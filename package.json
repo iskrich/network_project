@@ -7,6 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
+  "dependencies": {
+    "sqlite3" : "*"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ZetsubouClown/network_project.git"

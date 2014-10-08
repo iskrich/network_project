@@ -1,7 +1,14 @@
 var http = require("http"),
-    fs = require("fs");
+    fs = require("fs"),
+    auth = require("./authorization.js"),
+    url = require("url");
 
 var static_folder = "./static";
+
+var json_apps = {
+    "/register" : auth.register,
+    "/login" : auth.login
+};
 
 function check_static(url, serve){
     console.log(url);
@@ -12,8 +19,9 @@ function check_static(url, serve){
 }
 
 function handle_request(req, res){
+    var path = url.parse(req.url).pathname;
     function serve_static(url){
-	fs.readFile(static_folder + (url ? url : req.url), function(err, data) {
+	fs.readFile(static_folder + (url ? url : path), function(err, data) {
 	    if(err) {
 		res.writeHead(505);
 		res.end();
@@ -22,8 +30,10 @@ function handle_request(req, res){
 	    res.end(data);
 	});
     }
-    if(req.method.toLowerCase() == "get")
-	check_static(req.url, serve_static);
+
+    if(json_apps[path]) json_apps[path](req, res);
+    else if(req.method.toLowerCase() == "get")
+	check_static(path, serve_static);
 }
 
 http.createServer(handle_request).listen(process.env.PORT || 5000);
