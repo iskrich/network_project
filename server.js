@@ -12,8 +12,7 @@ var json_apps = {
 
 function check_static(url, serve){
     console.log(url);
-    if(url == '/') serve("/main.html");
-    else fs.exists(static_folder + url, function (exists) {
+    fs.exists(static_folder + url, function (exists) {
 	if(exists) serve();
     });
 }
@@ -31,7 +30,12 @@ function handle_request(req, res){
 	});
     }
 
-    if(json_apps[path]) json_apps[path](req, res);
+    if(path == "/") serve_static("/main.html");
+    else if(json_apps[path]){
+	res.json = {};
+	res.setHeader("Content-Type", "application/json");
+	json_apps[path](req, res);
+    }
     else if(req.method.toLowerCase() == "get")
 	check_static(path, serve_static);
 }
