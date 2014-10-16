@@ -7,6 +7,14 @@ var users = new sqlite.Database('databases/users.db', function (err) {
     else console.log('User database opened successfully');
 });
 
+function validLogin(login){
+    return login.match(/^[a-zA-Z0-9_.]+$/);
+}
+
+function validPass(pass){
+    return pass.match(/^[a-zA-Z0-9.!@#$%^&*()_+]+$/);
+}
+
 exports.register = function(request, response){
     var data = '';
     var resp = response.json;
@@ -21,6 +29,12 @@ exports.register = function(request, response){
 	var query = qs.parse(data);
 	if(!query.username || !query.password){
 	    resp.error = "Wrong format";
+	    response.end(JSON.stringify(resp));
+	} else if(!validLogin(query.username)){
+	    resp.error = "Wrong login format";
+	    response.end(JSON.stringify(resp));
+	} else if(!validPass(query.password)){
+	    resp.error = "Wrong password format";
 	    response.end(JSON.stringify(resp));
 	}
 	else users.get("select * from users where username = ?", query.username,
