@@ -1,5 +1,6 @@
 var sqlite = require('sqlite3');
 var qs = require('querystring');
+var tokens = require('./session.js');
 
 var users = new sqlite.Database('databases/users.db', function (err) {
     if(err) throw err;
@@ -35,6 +36,9 @@ exports.register = function(request, response){
 				       resp.error = "Some error while running register query";
 				       response.end(JSON.stringify(resp));
 				   } else {
+				       var token = tokens.createToken(query.username, query.password, this.lastID);
+				       response.setHeader("Set-Cookie", "token=" + token + "&name=" + query.username);
+				       resp.token = token;
 				       resp.name = query.username;
 				       response.end(JSON.stringify(resp));
 				   }
@@ -68,12 +72,13 @@ exports.login = function(request, response){
 				   resp.error = "Wrong password";
 				   response.end(JSON.stringify(resp));
 			       } else {
-				   response.setHeader("Set-Cookie", "name=" + query.username);
+				   var token = tokens.createToken(row.username, row.password, row.id);
+				   response.setHeader("Set-Cookie", "token=" + token + "&name=" + query.username);
+				   resp.token = token;
 				   resp.name = query.username;
 				   response.end(JSON.stringify(resp));
 			       }
-			   }
-			   else {
+			   } else {
 			       resp.error = "Unknown username";
 			       response.end(JSON.stringify(resp));
 			   }

@@ -1,7 +1,9 @@
 var http = require("http"),
     fs = require("fs"),
     auth = require("./authorization.js"),
-    url = require("url");
+    url = require("url"),
+    session = require('./session.js'),
+    qs = require("querystring");
 
 var static_folder = "./static";
 
@@ -10,17 +12,22 @@ var json_apps = {
     "/login" : auth.login
 };
 
-function check_static(url, serve){
+function check_static(url, serve, fail){
     console.log(url);
     fs.exists(static_folder + url, function (exists) {
-	if(exists) serve();
+	if(exists) serve(url);
+	else fail();
     });
 }
 
 function handle_request(req, res){
-    var path = url.parse(req.url).pathname;
+    var parsedURL = url.parse(req.url);
+    parsedURL.query = qs.parse(parsedURL.query);
+    var token = parsedURL.query.token || session.extractToken(req);
+    var path = parsedURL.pathname;
+
     function serve_static(url){
-	fs.readFile(static_folder + (url ? url : path), function(err, data) {
+	fs.readFile(static_folder + url, function(err, data) {
 	    if(err) {
 		res.writeHead(505);
 		res.end();
@@ -30,14 +37,18 @@ function handle_request(req, res){
 	});
     }
 
+    function write404(){
+	res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+	res.end("туда ли ты забрёл, пацанчик?");
+    }
+
     if(path == "/") serve_static("/main.html");
     else if(json_apps[path]){
 	res.json = {};
 	res.setHeader("Content-Type", "application/json");
 	json_apps[path](req, res);
     }
-    else if(req.method.toLowerCase() == "get")
-	check_static(path, serve_static);
+    else check_static(path, serve_static, write404);
 }
 
 http.createServer(handle_request).listen(process.env.PORT || 5000);
