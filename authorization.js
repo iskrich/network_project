@@ -1,5 +1,4 @@
 var sqlite = require('sqlite3');
-var qs = require('querystring');
 var tokens = require('./session.js');
 
 var users = new sqlite.Database('databases/users.db', function (err) {
@@ -26,7 +25,7 @@ exports.register = function(request, response){
 	}
     });
     request.on('end', function(){
-	var query = qs.parse(data);
+	var query = JSON.parse(data);
 	if(!query.username || !query.password){
 	    resp.error = "Wrong format";
 	    response.end(JSON.stringify(resp));
@@ -73,7 +72,7 @@ exports.login = function(request, response){
 	}
     });
     request.on('end', function(){
-	var query = qs.parse(data);
+	var query = JSON.parse(data);
 	if(!query.username || !query.password){
 	    resp.error = "Wrong format";
 	    response.end(JSON.stringify(resp));
