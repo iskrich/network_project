@@ -1,9 +1,15 @@
-function login(){
-    var form = document.getElementById("login_form");
-    var user = {
-	'username': form.elements[0].value,
-	'password': form.elements[1].value
+function parseForm(form){
+    var formData = {};
+    for(var i = 0; i < form.elements.length; ++i){
+	var elem = form.elements[i];
+	if(elem.type.toLowerCase() != "button")
+	    formData[elem.name] = elem.value;
     }
+    return formData;
+}
+
+function login(){
+    var user = parseForm(document.getElementById("login_form"));
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function(){
 	if(xmlhttp.readyState == 4)
@@ -13,12 +19,8 @@ function login(){
     xmlhttp.send(JSON.stringify(user));
 }
 
-function register(user, pass){
-    var form = document.getElementById("register_form");
-    var user = {
-	'username': form.elements[0].value,
-	'password': form.elements[1].value
-    }
+function register(){
+    var user = parseForm(document.getElementById("register_form"));
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function(){
 	if(xmlhttp.readyState == 4)
