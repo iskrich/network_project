@@ -23,7 +23,7 @@ function check_static(url, serve, fail){
 function handle_request(req, res){
     var parsedURL = url.parse(req.url);
     parsedURL.query = qs.parse(parsedURL.query);
-    var token = parsedURL.query.token || session.extractToken(req);
+    var token = parsedURL.query.token || session.extract(req);
     var path = parsedURL.pathname;
 
     function serve_static(url){
@@ -42,7 +42,7 @@ function handle_request(req, res){
 	res.end("туда ли ты забрёл, пацанчик?");
     }
 
-    if(path == "/") serve_static("/main.html");
+    if(path == "/") check_static(session.verify(token) ? "/main.html" : "/login.html", serve_static, write404);
     else if(json_apps[path]){
 	res.json = {};
 	res.setHeader("Content-Type", "application/json");

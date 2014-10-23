@@ -10,7 +10,7 @@ function User(login, pass){
     this.conversations = [];
 }
 
-mongo.connect("mongodb://admin:topsecret@linus.mongohq.com:10064/app30274483", function(err, db){
+mongo.connect(process.env.DATABASE_URL || "mongodb://admin:topsecret@linus.mongohq.com:10064/app30274483", function(err, db){
     if(err) throw err;
     users = db.collection('users');
     console.log("Successfully connected to the MongoDB server");
@@ -59,7 +59,7 @@ exports.register = function(request, response){
 			resp.error = "Some error while running register query";
 			response.end(JSON.stringify(resp));
 		    } else {
-			var token = tokens.createToken(newUser);
+			var token = tokens.create(newUser);
 			response.setHeader("Set-Cookie", "token=" + token);
 			resp.token = token;
 			response.end(JSON.stringify(resp));
@@ -94,7 +94,7 @@ exports.login = function(request, response){
 		    resp.error = "Wrong password";
 		    response.end(JSON.stringify(resp));
 		} else {
-		    var token = tokens.createToken(user);
+		    var token = tokens.create(user);
 		    response.setHeader("Set-Cookie", "token=" + token);
 		    resp.token = token;
 		    response.end(JSON.stringify(resp));

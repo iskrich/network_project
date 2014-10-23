@@ -3,7 +3,7 @@ var crypto = require("crypto"),
 
 var tokens = {};
 
-exports.createToken = function(user){
+exports.create = function(user){
     var tokenRaw = new Date().toISOString() + "!@#$%^&*()_+" + user.login + "!@#$%^&*()_+" + user.pass;
     var token = crypto.createHash('sha256').update(tokenRaw, 'utf8').digest('hex');
     // if there's a collision, let it do whatever because I don't even
@@ -12,10 +12,10 @@ exports.createToken = function(user){
     return token;
 }
 
-exports.verifyToken = function(token){
+exports.verify = function(token){
     return tokens[token];
 }
 
-exports.extractToken = function(request){
+exports.extract = function(request){
     return qs.parse(request.headers.cookie).token;
 }

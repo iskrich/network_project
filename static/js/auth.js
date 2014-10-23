@@ -12,8 +12,10 @@ function login(){
     var user = parseForm(document.getElementById("login_form"));
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function(){
-	if(xmlhttp.readyState == 4)
+	if(xmlhttp.readyState == 4){
 	    alert(xmlhttp.responseText);
+	    window.location.replace("/");
+	}
     }
     xmlhttp.open("POST", "login", true);
     xmlhttp.send(JSON.stringify(user));
@@ -23,8 +25,10 @@ function register(){
     var user = parseForm(document.getElementById("register_form"));
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function(){
-	if(xmlhttp.readyState == 4)
+	if(xmlhttp.readyState == 4){
 	    alert(xmlhttp.responseText);
+	    window.location.replace("/");
+	}
     }
     xmlhttp.open("POST", "register", true);
     xmlhttp.send(JSON.stringify(user));
