@@ -1,9 +1,20 @@
-var sqlite = require('sqlite3');
+var mongo  = require('mongodb').MongoClient;
 var tokens = require('./session.js');
 
-var users = new sqlite.Database('databases/users.db', function (err) {
+var users;
+
+function User(login, pass){
+    this.login = login;
+    this.pass = pass;
+    this.contacts = [];
+    this.conversations = [];
+}
+
+mongo.connect("mongodb://admin:topsecret@linus.mongohq.com:10064/app30274483", function(err, db){
     if(err) throw err;
-    else console.log('User database opened successfully');
+    users = db.collection('users');
+    console.log("Successfully connected to the MongoDB server");
+    // I hope it's ok to leave it open
 });
 
 function validLogin(login){
@@ -36,28 +47,26 @@ exports.register = function(request, response){
 	    resp.error = "Wrong password format";
 	    response.end(JSON.stringify(resp));
 	}
-	else users.get("select * from users where username = ?", query.username,
-		       function(err, row){
-			   if(err) throw err;
-			   if(row){
-			       resp.error = "Username has already been taken";
-			       response.end(JSON.stringify(resp));
-			   }
-			   else {
-			       users.run("insert into users (username, password) values (?, ?)", query.username, query.password, function (err){
-				   if(err){
-				       resp.error = "Some error while running register query";
-				       response.end(JSON.stringify(resp));
-				   } else {
-				       var token = tokens.createToken(query.username, query.password, this.lastID);
-				       response.setHeader("Set-Cookie", "token=" + token + "&name=" + query.username);
-				       resp.token = token;
-				       resp.name = query.username;
-				       response.end(JSON.stringify(resp));
-				   }
-			       });
-			   }
-		       });
+	else users.find({login: query.username}).toArray(function(err, res){
+	    if(err) throw err;
+	    if(res.length > 0){
+		resp.error = "Username has already been taken";
+		response.end(JSON.stringify(resp));
+	    } else {
+		var newUser = new User(query.username, query.password);
+		users.insertOne(newUser, function (err){
+		    if(err){
+			resp.error = "Some error while running register query";
+			response.end(JSON.stringify(resp));
+		    } else {
+			var token = tokens.createToken(newUser);
+			response.setHeader("Set-Cookie", "token=" + token);
+			resp.token = token;
+			response.end(JSON.stringify(resp));
+		    }
+		});
+	    }
+	});
     });
 }
 
@@ -77,24 +86,23 @@ exports.login = function(request, response){
 	    resp.error = "Wrong format";
 	    response.end(JSON.stringify(resp));
 	}
-	else users.get("select * from users where username = ?", query.username,
-		       function(err, row){
-			   if(err) throw err;
-			   if(row){
-			       if(query.password != row.password){
-				   resp.error = "Wrong password";
-				   response.end(JSON.stringify(resp));
-			       } else {
-				   var token = tokens.createToken(row.username, row.password, row.id);
-				   response.setHeader("Set-Cookie", "token=" + token + "&name=" + query.username);
-				   resp.token = token;
-				   resp.name = query.username;
-				   response.end(JSON.stringify(resp));
-			       }
-			   } else {
-			       resp.error = "Unknown username";
-			       response.end(JSON.stringify(resp));
-			   }
-		       });
+	else users.find({login: query.username}).toArray(function(err, res){
+	    if(err) throw err;
+	    if(res.length > 0){
+		var user = res[0];
+		if(query.password != user.pass){
+		    resp.error = "Wrong password";
+		    response.end(JSON.stringify(resp));
+		} else {
+		    var token = tokens.createToken(user);
+		    response.setHeader("Set-Cookie", "token=" + token);
+		    resp.token = token;
+		    response.end(JSON.stringify(resp));
+		}
+	    } else {
+		resp.error = "Unknown username";
+		response.end(JSON.stringify(resp));
+	    }
+	});
     });
 }

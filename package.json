@@ -8,7 +8,7 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "sqlite3" : "*"
+    "mongodb": "~2.0"
   },
   "repository": {
     "type": "git",
