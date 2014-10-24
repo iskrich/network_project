@@ -10,6 +10,17 @@ function User(login, pass){
     this.conversations = [];
 }
 
+function addContact(one, another){
+    if(one.contacts.indexOf(another.login) == -1)
+	one.contacts.push(another.login);
+}
+
+function removeContact(one, another){
+    var index;
+    if((index = one.contacts.indexOf(another.login)) != -1)
+	one.contacts.splice(index, 1);
+}
+
 mongo.connect(process.env.DATABASE_URL || "mongodb://admin:topsecret@linus.mongohq.com:10064/app30274483", function(err, db){
     if(err) throw err;
     users = db.collection('users');
@@ -104,5 +115,64 @@ exports.login = function(request, response){
 		response.end(JSON.stringify(resp));
 	    }
 	});
+    });
+}
+
+exports.contactlist = function(request, response){
+    var data = '';
+    var resp = response.json;
+    request.on('readable', function(){
+	var d = request.read();
+	if(d){
+	    if(typeof d == 'string') data += d;
+	    else if(d instanceof Buffer) data += d.toString('utf-8');
+	}
+    });
+    request.on('end', function(){
+	var query = data ? JSON.parse(data) : {};
+	var token = query.token || request.token;
+	var user = tokens.verify(token);
+	resp.status = "fail";
+	if(!user){
+	    resp.error = "Invalid token";
+	    response.end(JSON.stringify(resp));
+	} else {
+	    users.find({login : user}).toArray(function(err, res){
+		if(err) throw err;
+		if(res.length == 0){
+		    resp.error = "You were deleted";
+		    response.end(JSON.stringify(resp));
+		} else {
+		    var this_user = res[0];
+		    if(request.method == "GET"){
+			resp.status = "success";
+			resp.contacts = new Array(this_user.contacts.length);
+			for(var i = 0; i < this_user.contacts.length; ++i)
+			    resp.contacts[i] = {name : this_user.contacts[i]};
+			response.end(JSON.stringify(resp));
+		    } else if(request.method == "POST"){
+			var target = query.name;
+			if(!target){
+			    resp.error = "Target not specified";
+			    response.end(JSON.stringify(resp));
+			} else users.find({login : target}).toArray(function(err, res){
+			    if(err) throw err;
+			    var target_user = res[0];
+			    if(!target_user){
+				resp.error = "No such user";
+				response.end(JSON.stringify(resp));
+			    } else {
+				if(query.add) addContact(this_user, target_user);
+				else removeContact(this_user, target_user);
+				users.updateOne({login: this_user.login}, this_user,
+						function(err){ if(err) throw err; });
+				resp.status = "success";
+				response.end(JSON.stringify(resp));
+			    }
+			});
+		    }
+		}
+	    });
+	}
     });
 }
