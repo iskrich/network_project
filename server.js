@@ -1,6 +1,6 @@
 var http = require("http"),
     fs = require("fs"),
-    auth = require("./authorization.js"),
+    users = require("./users.js"),
     url = require("url"),
     session = require('./session.js'),
     qs = require("querystring");
@@ -8,8 +8,8 @@ var http = require("http"),
 var static_folder = "./static";
 
 var json_apps = {
-    "/register" : auth.register,
-    "/login" : auth.login
+    "/register" : users.register,
+    "/login"    : users.login
 };
 
 function check_static(url, serve, fail){
