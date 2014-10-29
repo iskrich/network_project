@@ -7,18 +7,62 @@ function User(login, pass){
     this.login = login;
     this.pass = pass;
     this.contacts = [];
+    this.outgoing = [];
+    this.incoming = [];
     this.conversations = [];
 }
 
-function addContact(one, another){
-    if(one.contacts.indexOf(another.login) == -1)
-	one.contacts.push(another.login);
+function sendRequest(user, target){
+    if(user.contacts.indexOf(target.login) != -1)
+	return;
+    if(user.outgoing.indexOf(target.login) == -1)
+	user.outgoing.push(target.login);
+    if(target.incoming.indexOf(user.login) == -1)
+	target.incoming.push(user.login);
 }
 
-function removeContact(one, another){
+function acceptRequest(user, target){
+    var index = user.incoming.indexOf(target.login);
+    if(index != -1){
+	user.incoming.splice(index, 1);
+	user.contacts.push(target.login);
+	index = target.outgoing.indexOf(user.login);
+	if(index != -1) target.outgoing.splice(index, 1);
+	target.contacts.push(user.login);
+    }
+}
+
+function rejectRequest(user, target){
     var index;
-    if((index = one.contacts.indexOf(another.login)) != -1)
-	one.contacts.splice(index, 1);
+    if((index = user.incoming.indexOf(target.login)) != -1)
+	user.incoming.splice(index, 1);
+}
+
+function cancelRequest(user, target){
+    var index = user.outgoing.indexOf(target.login);
+    if(index != -1){
+	user.outgoing.splice(index, 1);
+	index = target.incoming.indexOf(user.login);
+	if(index != -1) target.incoming.splice(index, 1);
+    }
+}
+
+function removeContact(user, target){
+    var index = user.contacts.indexOf(target.login);
+    if(index != -1){
+	user.contacts.splice(index, 1);
+	index = target.contacts.indexOf(user.login);
+	if(index != -1) target.contacts.splice(index, 1);
+	target.outgoing.push(user.login);
+    }
+}
+
+var contactlist_actions = {
+    "request": sendRequest,
+    "accept": acceptRequest,
+    "reject": rejectRequest,
+    "cancel": cancelRequest,
+    "remove": removeContact,
 }
 
 mongo.connect(process.env.DATABASE_URL || "mongodb://admin:topsecret@linus.mongohq.com:10064/app30274483", function(err, db){
@@ -147,24 +191,37 @@ exports.contactlist = function(request, response){
 		    if(request.method == "GET"){
 			resp.status = "success";
 			resp.contacts = new Array(this_user.contacts.length);
+
 			for(var i = 0; i < this_user.contacts.length; ++i)
 			    resp.contacts[i] = {name : this_user.contacts[i]};
+
+			resp.incoming = new Array(this_user.incoming.length);
+			for(var i = 0; i < this_user.incoming.length; ++i)
+			    resp.incoming[i] = {name : this_user.incoming[i]};
+
+			resp.outgoing = new Array(this_user.outgoing.length);
+			for(var i = 0; i < this_user.outgoing.length; ++i)
+			    resp.outgoing[i] = {name : this_user.outgoing[i]};
+
 			response.end(JSON.stringify(resp));
 		    } else if(request.method == "POST"){
-			var target = query.name;
-			if(!target){
-			    resp.error = "Target not specified";
+			if(!query.action || !query.target){
+			    resp.error = "Action not specified";
 			    response.end(JSON.stringify(resp));
-			} else users.find({login : target}).toArray(function(err, res){
+			} else if(query.target == user){
+			    resp.error = "Don't send request to yourself, silly";
+			    response.end(JSON.stringify(resp));
+			} else users.find({login : query.target}).toArray(function(err, res){
 			    if(err) throw err;
 			    var target_user = res[0];
 			    if(!target_user){
 				resp.error = "No such user";
 				response.end(JSON.stringify(resp));
 			    } else {
-				if(query.add) addContact(this_user, target_user);
-				else removeContact(this_user, target_user);
+				contactlist_actions[query.action](this_user, target_user);
 				users.updateOne({login: this_user.login}, this_user,
+						function(err){ if(err) throw err; });
+				users.updateOne({login: target_user.login}, target_user,
 						function(err){ if(err) throw err; });
 				resp.status = "success";
 				response.end(JSON.stringify(resp));

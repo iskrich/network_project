@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WHOA</title>
+  <script src="js/contacts.js"></script>
+</head>
+
+<body onLoad="getContactList()">
+  <h1 align=center>AWESOME LOGO</h1>
+
+  <button onClick="document.cookie='token=; expires=Thu, 01 Jan 1970 00:00:00 GMT;'; document.location.reload();">Log out</button>
+  <input id="target" type="text"/><button onClick="sendRequest('request', getTarget())">Add user</button><br/>
+  <button onClick="getContactList()">Get contacts</button>
+  <ul>
+    <li>These users want to add you to their contact lists:<ul id="incoming"></ul></li>
+    <li>Waiting for these users to accept:<ul id="outgoing"></ul></li>
+    <li>Contacts:<ul id="contacts"></ul></li>
+  </ul>
+</body>
+</html>
