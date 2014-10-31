@@ -2,6 +2,8 @@ var crypto = require("crypto"),
     qs = require("querystring");
 
 var tokens = {};
+var online = {};
+exports.online = online;
 
 exports.create = function(user){
     var tokenRaw = new Date().toISOString() + "!@#$%^&*()_+" + user.login + "!@#$%^&*()_+" + user.pass;
@@ -13,7 +15,14 @@ exports.create = function(user){
 }
 
 exports.verify = function(token){
-    return tokens[token];
+    // is it bad to have it executed twice per request? probably
+    var user = tokens[token];
+    if(!user) return null;
+    clearTimeout(online[user]);
+    online[user] = setTimeout(function(){
+	online[user] = 0;
+    }, 120000);
+    return user;
 }
 
 exports.extract = function(request){

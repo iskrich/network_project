@@ -89,8 +89,12 @@ exports.contactlist = function(request, response){
 			resp.status = "success";
 			resp.contacts = new Array(this_user.contacts.length);
 
-			for(var i = 0; i < this_user.contacts.length; ++i)
-			    resp.contacts[i] = {name : this_user.contacts[i]};
+			var contact;
+			for(var i = 0; i < this_user.contacts.length; ++i){
+			    contact = this_user.contacts[i];
+			    resp.contacts[i] = {name : contact,
+					       online : session.online[contact] ? 1 : 0};
+			}
 
 			resp.incoming = new Array(this_user.incoming.length);
 			for(var i = 0; i < this_user.incoming.length; ++i)

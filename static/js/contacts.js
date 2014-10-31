@@ -28,7 +28,7 @@ function getContactList(){
 		if(json.contacts.length == 0)
 		    contactlist.innerHTML = "You don't have any contacts";
 		else json.contacts.forEach(function(user){
-		    contactlist.innerHTML += "<li>" + requestButton('remove', user.name) + user.name + "</li>";
+		    contactlist.innerHTML += "<li>" + requestButton('remove', user.name) + user.name + (user.online ? "(+)" : "(-)") + "</li>";
 		});
 	    }
 	}
