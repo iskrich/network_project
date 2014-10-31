@@ -37,9 +37,9 @@ exports.register = function(request, response){
 	    resp.error = "Wrong password format";
 	    response.end(JSON.stringify(resp));
 	}
-	else users.find({login: query.username}).toArray(function(err, res){
+	else users.find({login: query.username}).next(function(err, res){
 	    if(err) throw err;
-	    if(res.length > 0){
+	    if(res){
 		resp.error = "Username has already been taken";
 		response.end(JSON.stringify(resp));
 	    } else {
@@ -76,10 +76,9 @@ exports.login = function(request, response){
 	    resp.error = "Wrong format";
 	    response.end(JSON.stringify(resp));
 	}
-	else users.find({login: query.username}).toArray(function(err, res){
+	else users.find({login: query.username}).next(function(err, user){
 	    if(err) throw err;
-	    if(res.length > 0){
-		var user = res[0];
+	    if(user){
 		if(query.password != user.pass){
 		    resp.error = "Wrong password";
 		    response.end(JSON.stringify(resp));

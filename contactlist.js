@@ -79,13 +79,12 @@ exports.contactlist = function(request, response){
 	    resp.error = "Invalid token";
 	    response.end(JSON.stringify(resp));
 	} else {
-	    users.find({login : user}).toArray(function(err, res){
+	    users.find({login : user}).next(function(err, this_user){
 		if(err) throw err;
-		if(res.length == 0){
+		if(!this_user){
 		    resp.error = "You were deleted";
 		    response.end(JSON.stringify(resp));
 		} else {
-		    var this_user = res[0];
 		    if(request.method == "GET"){
 			resp.status = "success";
 			resp.contacts = new Array(this_user.contacts.length);
@@ -107,11 +106,10 @@ exports.contactlist = function(request, response){
 			    resp.error = "Action not specified";
 			    response.end(JSON.stringify(resp));
 			} else if(query.target == user){
-			    resp.error = "Don't send request to yourself, silly";
+			    resp.error = "Don't send requests to yourself, silly";
 			    response.end(JSON.stringify(resp));
-			} else users.find({login : query.target}).toArray(function(err, res){
+			} else users.find({login : query.target}).next(function(err, target_user){
 			    if(err) throw err;
-			    var target_user = res[0];
 			    if(!target_user){
 				resp.error = "No such user";
 				response.end(JSON.stringify(resp));

@@ -17,6 +17,7 @@ mongo.connect(process.env.DATABASE_URL || "mongodb://admin:topsecret@linus.mongo
     db = DB;
     if(err) throw err;
     exports.users = db.collection('users');
+    exports.users.ensureIndex({login: 1});
     console.log("Successfully connected to the MongoDB server");
     console.log("emitting to " + emitter.listeners('load').length);
     emitter.emit('load');
