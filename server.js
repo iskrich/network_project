@@ -4,6 +4,7 @@ var http = require("http"),
     contacts = require("./contactlist.js");
     url = require("url"),
     session = require('./session.js'),
+    conv = require('./conversations.js');
     qs = require("querystring");
 
 var static_folder = "./static";
@@ -12,6 +13,7 @@ var json_apps = {
     "/register" : users.register,
     "/login"    : users.login,
     "/contacts" : contacts.contactlist,
+    "/talk"     : conv.conversations,
 };
 
 function check_static(url, serve, fail){

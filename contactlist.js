@@ -1,14 +1,20 @@
 var db = require('./db.js');
 var tokens = require('./session.js');
+var conversations = require('./conversations.js');
 
 var users;
 db.event.on('load', function(){
     users = db.users;
 });
 
+function findContact(user, target_login){
+    for(var i = 0; i < user.contacts.length; ++i)
+	if(user.contacts[i].name == target_login) return i;
+    return -1;
+}
 
 function sendRequest(user, target){
-    if(user.contacts.indexOf(target.login) != -1)
+    if(findContact(user, target.login) != -1)
 	return;
     if(user.outgoing.indexOf(target.login) == -1)
 	user.outgoing.push(target.login);
@@ -19,11 +25,12 @@ function sendRequest(user, target){
 function acceptRequest(user, target){
     var index = user.incoming.indexOf(target.login);
     if(index != -1){
+	var conv = conversations.create([user.login, target.login]);
 	user.incoming.splice(index, 1);
-	user.contacts.push(target.login);
+	user.contacts.push({name: target.login, convID: conv});
 	index = target.outgoing.indexOf(user.login);
 	if(index != -1) target.outgoing.splice(index, 1);
-	target.contacts.push(user.login);
+	target.contacts.push({name: user.login, convID: conv});
     }
 }
 
@@ -43,12 +50,12 @@ function cancelRequest(user, target){
 }
 
 function removeContact(user, target){
-    var index = user.contacts.indexOf(target.login);
+    var index = findContact(user, target.login);
     if(index != -1){
+	conversations.remove(user.contacts[index].convID);
 	user.contacts.splice(index, 1);
-	index = target.contacts.indexOf(user.login);
+	index = findContact(target, user.login);
 	if(index != -1) target.contacts.splice(index, 1);
-	target.outgoing.push(user.login);
     }
 }
 
@@ -92,8 +99,9 @@ exports.contactlist = function(request, response){
 			var contact;
 			for(var i = 0; i < this_user.contacts.length; ++i){
 			    contact = this_user.contacts[i];
-			    resp.contacts[i] = {name : contact,
-					       online : session.online[contact] ? 1 : 0};
+			    resp.contacts[i] = {name : contact.name,
+						conv : contact.convID,
+						online : session.online[contact.name] ? 1 : 0};
 			}
 
 			resp.incoming = new Array(this_user.incoming.length);
@@ -107,7 +115,7 @@ exports.contactlist = function(request, response){
 			response.end(JSON.stringify(resp));
 		    } else if(request.method == "POST"){
 			if(!query.action || !query.target){
-			    resp.error = "Action not specified";
+			    resp.error = "Action or target not specified";
 			    response.end(JSON.stringify(resp));
 			} else if(query.target == user){
 			    resp.error = "Don't send requests to yourself, silly";

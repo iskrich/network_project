@@ -28,7 +28,7 @@ function getContactList(){
 		if(json.contacts.length == 0)
 		    contactlist.innerHTML = "You don't have any contacts";
 		else json.contacts.forEach(function(user){
-		    contactlist.innerHTML += "<li>" + requestButton('remove', user.name) + user.name + (user.online ? "(+)" : "(-)") + "</li>";
+		    contactlist.innerHTML += "<li>" + requestButton('remove', user.name) + historyButton(user.conv) + sendButton(user.conv) + user.name + (user.online ? "(+)" : "(-)") + "</li>";
 		});
 	    }
 	}
@@ -54,10 +54,42 @@ function sendRequest(action, target){
     }));
 }
 
+function getHistory(id){
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function(){
+	if(xmlhttp.readyState == 4){
+	    alert(xmlhttp.responseText);
+	}
+    }
+    xmlhttp.open("GET", "talk?id=" + id + "&content=messages", true);
+    xmlhttp.send();
+}
+
+function sendMessage(id){
+    var message = prompt("Type your message");
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function(){
+	if(xmlhttp.readyState == 4){
+	    var json = JSON.parse(xmlhttp.responseText);
+	    if(json.error) alert(json.error);
+	}
+    }
+    xmlhttp.open("POST", "talk", true);
+    xmlhttp.send(JSON.stringify({id: id, message: message}));
+}
+
 function getTarget(){
     return document.getElementById("target").value;
 }
 
 function requestButton(action, target){
     return "<button onClick=\"sendRequest('" + action + "','" + target + "')\">" + action + "</button>";
+}
+
+function historyButton(id){
+    return "<button onClick=\"getHistory('" + id + "')\">history</button>";
+}
+
+function sendButton(id){
+    return "<button onClick=\"sendMessage('" + id + "')\">send</button>";
 }

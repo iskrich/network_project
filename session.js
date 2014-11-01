@@ -16,6 +16,7 @@ exports.create = function(user){
 
 exports.verify = function(token){
     // is it bad to have it executed twice per request? probably
+    if(!token) return null;
     var user = tokens[token];
     if(!user) return null;
     clearTimeout(online[user]);
