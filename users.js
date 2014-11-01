@@ -7,6 +7,15 @@ db.event.on('load', function(){
     users = db.users;
 });
 
+function User(login, pass){
+    this.login = login;
+    this.pass = pass;
+    this.contacts = [];
+    this.outgoing = [];
+    this.incoming = [];
+    this.conversations = [];
+}
+
 function validLogin(login){
     return login.match(/^[a-zA-Z0-9_.]+$/);
 }
