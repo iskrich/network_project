@@ -35,7 +35,7 @@ exports.register = function(request, response){
 	}
     });
     request.on('end', function(){
-	var query = JSON.parse(data);
+	var query = data ? JSON.parse(data) : {};
 	if(!query.username || !query.password){
 	    resp.error = "Wrong format";
 	    response.end(JSON.stringify(resp));
@@ -80,7 +80,7 @@ exports.login = function(request, response){
 	}
     });
     request.on('end', function(){
-	var query = JSON.parse(data);
+	var query = data ? JSON.parse(data) : {};
 	if(!query.username || !query.password){
 	    resp.error = "Wrong format";
 	    response.end(JSON.stringify(resp));
