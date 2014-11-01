@@ -78,7 +78,7 @@ exports.conversations = function(request, response){
 		    var amount = query.amount || 10;
 		    if(amount < 1) amount = 10;
 		    db.getCollection("conversation" + id).find({}, {_id: 0})
-			.sort({time: 1}).limit(amount)
+			.sort({time: -11}).limit(amount)
 			.toArray(function(err, res){
 			    if(err) throw err;
 			    resp.messages = res;
