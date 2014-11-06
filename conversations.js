@@ -1,6 +1,7 @@
 var db = require('./db.js');
 var tokens = require('./session.js');
 var ObjectID = require('mongodb').ObjectID;
+var wss = require('./wss.js');
 
 var users, conversations;
 db.event.on('load', function(){
@@ -93,12 +94,27 @@ exports.conversations = function(request, response){
 		    resp.error = "Nothing to post";
 		    response.end(JSON.stringify(resp));
 		} else {
-		    db.getCollection("conversation" + id)
-			.insert(new Message(user.login, message), 
-				function(err){
+		    conversations.find({_id: ObjectID.createFromHexString(id)}).next(function(err, conv){
+			if(err) throw err;
+			if(!conv){
+			    resp.error = "No such conversation";
+			    response.end(JSON.stringify(resp));
+			} else {
+			    var msg = new Message(user.login, message);
+			    conv.users.forEach(function(target){
+				wss.send(target, JSON.stringify({
+				    action: "new_message",
+				    id: id,
+				    msg: msg,
+				}));
+			    });
+			    db.getCollection("conversation" + id)
+				.insert(msg, function(err){
 				    if(err) throw err;
 				    response.end(JSON.stringify(resp));
 				});
+			}
+		    });
 		}
 	    }
 	});

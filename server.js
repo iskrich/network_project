@@ -55,4 +55,7 @@ function handle_request(req, res){
     else check_static(path, serve_static, write404);
 }
 
-http.createServer(handle_request).listen(process.env.PORT || 5000);
+var server = http.createServer(handle_request);
+server.listen(process.env.PORT || 5000);
+
+require('./wss.js').init(server);

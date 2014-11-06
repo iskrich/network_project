@@ -93,3 +93,38 @@ function historyButton(id){
 function sendButton(id){
     return "<button onClick=\"sendMessage('" + id + "')\">send</button>";
 }
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) != -1) return c.substring(name.length,c.length);
+    }
+    return "";
+}
+
+
+function getWSURI(){
+    var loc = window.location, new_uri;
+    var uri;
+    if (loc.protocol === "https:") uri = "wss://";
+    else uri = "ws://";
+    uri += loc.host + '/';
+    uri += getCookie('token');
+    console.log(uri);
+    return uri;
+}
+
+var ws = new WebSocket(getWSURI());
+
+ws.onopen = function (event) {
+    console.log("open");
+    console.log(event);
+};
+
+ws.onmessage = function(data){
+    console.log("message");
+    console.log(data);
+};

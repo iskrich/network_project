@@ -1,6 +1,7 @@
 var db = require('./db.js');
 var tokens = require('./session.js');
 var conversations = require('./conversations.js');
+var wss = require('./wss.js');
 
 var users;
 db.event.on('load', function(){
@@ -101,7 +102,7 @@ exports.contactlist = function(request, response){
 			    contact = this_user.contacts[i];
 			    resp.contacts[i] = {name : contact.name,
 						conv : contact.convID,
-						online : session.online[contact.name] ? 1 : 0};
+						online : wss.clients[contact.name] ? 1 : 0};
 			}
 
 			resp.incoming = new Array(this_user.incoming.length);
