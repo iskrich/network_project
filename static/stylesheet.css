@@ -1,0 +1,89 @@
+body {
+    background-color: #C6E2FF;
+}
+
+.list .header {
+    height: 1.5em;
+    padding: 5px;
+    background-color: blue;
+    margin: 2px;
+}
+
+.list .header:before {
+    content: "v ";
+}
+
+.collapsed .header:before {
+    content: "> ";
+}
+
+.collapsed ul {
+    display: none;
+}
+
+.list ul li {
+    padding: 5px;
+    background-color: green;
+}
+
+.hidden {
+    display: none;
+}
+
+#contacts ul .online:before {
+    content: "[+]";
+}
+
+#contacts ul li:before {
+    content: "[-]";
+}
+
+#contactlist {
+    float: left;
+    width: 25%;
+    height: 75vh;
+    background-color: red;
+    overflow: auto;
+    padding: 10px;
+}
+
+#chat {
+    float: right;
+    width: 70%;
+    height: 75vh;
+    background-color: magenta;
+    padding: 10px;
+}
+
+#messagelog {
+    float: left;
+    width: 90%;
+    height: 90%;
+    background-color: purple;
+    overflow: auto;
+}
+
+#participants {
+    float: right;
+    width: 10%;
+    height: 90%;
+    background-color: cyan;
+    overflow: auto;
+}
+
+#message_input {
+    width: 90%;
+    height: 10%;
+    background-color: white;
+    float: left;
+    word-wrap: break-word;
+    overflow-y: auto;
+}
+
+#send_button {
+    text-align: center;
+    width: 10%;
+    height: 10%;
+    background-color: red;
+    float: right;
+}

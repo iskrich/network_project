@@ -3,18 +3,35 @@
 <head>
   <title>WHOA</title>
   <script src="js/contacts.js"></script>
+  <script src="js/conversation.js"></script>
+  <script src="js/ws.js"></script>
+  <link type="text/css" rel="stylesheet" href="stylesheet.css"/>
 </head>
 
 <body onLoad="getContactList()">
   <h1 align=center>AWESOME LOGO</h1>
 
-  <button onClick="document.cookie='token=; expires=Thu, 01 Jan 1970 00:00:00 GMT;'; document.location.reload();">Log out</button>
-  <input id="target" type="text"/><button onClick="sendRequest('request', getTarget())">Add user</button><br/>
-  <button onClick="getContactList()">Get contacts</button>
-  <ul>
-    <li>These users want to add you to their contact lists:<ul id="incoming"></ul></li>
-    <li>Waiting for these users to accept:<ul id="outgoing"></ul></li>
-    <li>Contacts:<ul id="contacts"></ul></li>
-  </ul>
+  <button onClick="document.cookie='token=; expires=Thu, 01 Jan 1970 00:00:00 GMT;'; document.location.reload();">Log out</button><br>
+  <div id="contactlist">
+    <input id="target" type="text"/><button onClick="sendRequest('request', getTarget())">Add user</button><br/>
+    <div class="list collapsed" id="incoming">
+      <div class="header" onclick="expand('#incoming')">Incoming requests</div>
+      <ul></ul>
+    </div>
+    <div class="list collapsed" id="outgoing">
+      <div class="header" onclick="expand('#outgoing')">Outgoing requests</div>
+      <ul></ul>
+    </div>
+    <div class="list" id="contacts">
+      <div class="header" onclick="expand('#contacts')">Contacts</div>
+      <ul></ul>
+    </div>
+  </div>
+  <div id="chat" class="hidden">
+    <div id="messagelog"></div>
+    <div id="participants"></div>
+    <div id="message_input" contenteditable=true></div>
+    <div id="send_button" onclick="sendMessage()">Send</div>
+  </div>
 </body>
 </html>
