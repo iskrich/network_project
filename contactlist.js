@@ -19,8 +19,13 @@ function sendRequest(user, target){
 	return;
     if(user.outgoing.indexOf(target.login) == -1)
 	user.outgoing.push(target.login);
-    if(target.incoming.indexOf(user.login) == -1)
+    if(target.incoming.indexOf(user.login) == -1){
 	target.incoming.push(user.login);
+	wss.send(target.login, JSON.stringify({
+	    action: "friend_request",
+	    user: user.login,
+	}));
+    }
 }
 
 function acceptRequest(user, target){
@@ -32,13 +37,27 @@ function acceptRequest(user, target){
 	index = target.outgoing.indexOf(user.login);
 	if(index != -1) target.outgoing.splice(index, 1);
 	target.contacts.push({name: user.login, convID: conv});
+	wss.send(target.login, JSON.stringify({
+	    action: "request_accept",
+	    user: user.login,
+	    status: wss.clients[user.login] ? 1 : 0,
+	}));
     }
 }
 
 function rejectRequest(user, target){
     var index;
-    if((index = user.incoming.indexOf(target.login)) != -1)
+    if((index = user.incoming.indexOf(target.login)) != -1){
 	user.incoming.splice(index, 1);
+	index = target.outgoing.indexOf(user.login);
+	if(index != -1){
+	    target.outgoing.splice(index, 1);
+	    wss.send(target.login, JSON.stringify({
+		action: "request_reject",
+		user: user.login,
+	    }));
+	}
+    }
 }
 
 function cancelRequest(user, target){
@@ -46,7 +65,13 @@ function cancelRequest(user, target){
     if(index != -1){
 	user.outgoing.splice(index, 1);
 	index = target.incoming.indexOf(user.login);
-	if(index != -1) target.incoming.splice(index, 1);
+	if(index != -1){
+	    target.incoming.splice(index, 1);
+	    wss.send(target.login, JSON.stringify({
+		action: "request_cancel",
+		user: user.login,
+	    }));
+	}
     }
 }
 
@@ -56,7 +81,13 @@ function removeContact(user, target){
 	conversations.remove(user.contacts[index].convID);
 	user.contacts.splice(index, 1);
 	index = findContact(target, user.login);
-	if(index != -1) target.contacts.splice(index, 1);
+	if(index != -1){
+	    target.contacts.splice(index, 1);
+	    wss.send(target.login, JSON.stringify({
+		action: "contact_remove",
+		user: user.login,
+	    }));
+	}
     }
 }
 
@@ -142,4 +173,3 @@ exports.contactlist = function(request, response){
 	}
     });
 }
-
