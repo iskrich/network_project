@@ -27,7 +27,9 @@ ws.onmessage = function(data){
     var json = JSON.parse(data.data);
     switch(json.action){
     case 'status_change':
-	contacts[json.user].classList.toggle('online', json.status);
+		contacts[json.user].classList.toggle('online', json.status);break;
+	case 'new_message':
+		addMessage(json.msg);
     }
     console.log(json);
 };
