@@ -13,7 +13,8 @@
 
   <button onClick="document.cookie='token=; expires=Thu, 01 Jan 1970 00:00:00 GMT;'; document.location.reload();">Log out</button><br>
   <div id="contactlist">
-    <input id="target" type="text"/><button onClick="sendRequest('request', getTarget())">Add user</button><br/>
+    <input id="target" type="text"/>
+	<button id="add_user" onClick="sendRequest('request', getTarget())">Add user</button><br/>
     <div class="list collapsed" id="incoming">
       <div class="header" onclick="expand('#incoming')">Incoming requests</div>
       <ul></ul>
@@ -31,7 +32,7 @@
     <div id="messagelog"></div>
     <div id="participants"></div>
     <div id="message_input" contenteditable=true></div>
-    <div id="send_button" onclick="sendMessage()">Send</div>
+    <div style="color:#EDEDE7" id="send_button" onclick="sendMessage()">Send</div>
   </div>
 </body>
 </html>

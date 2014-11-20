@@ -1,11 +1,11 @@
 body {
-    background-color: #C6E2FF;
+    background-color: #FFBD1B;
 }
 
 .list .header {
     height: 1.5em;
     padding: 5px;
-    background-color: blue;
+    background-color:  #EDEDE7;
     margin: 2px;
 }
 
@@ -42,7 +42,7 @@ body {
     float: left;
     width: 25%;
     height: 75vh;
-    background-color: red;
+    background-color: #544D4A;
     overflow: auto;
     padding: 10px;
 }
@@ -51,7 +51,7 @@ body {
     float: right;
     width: 70%;
     height: 75vh;
-    background-color: magenta;
+    background-color: black;
     padding: 10px;
 }
 
@@ -59,7 +59,7 @@ body {
     float: left;
     width: 90%;
     height: 90%;
-    background-color: purple;
+    background-color: #9B7159;
     overflow: auto;
 }
 
@@ -67,7 +67,7 @@ body {
     float: right;
     width: 10%;
     height: 90%;
-    background-color: cyan;
+    background-color: #EDEDE7;
     overflow: auto;
 }
 
@@ -81,9 +81,11 @@ body {
 }
 
 #send_button {
+	background-color:#4F4340;
     text-align: center;
     width: 10%;
     height: 10%;
-    background-color: red;
     float: right;
+	cursor:pointer;
+	cursor:hand;
 }

@@ -4,8 +4,10 @@ function getHistory(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function(){
 	if(xmlhttp.readyState == 4){
-	    document.getElementById("messagelog").innerHTML =
-		xmlhttp.responseText;
+		document.getElementById("messagelog").innerHTML="";
+		var json = JSON.parse(xmlhttp.responseText);
+		json.messages.forEach(function(message){
+		document.getElementById("messagelog").innerHTML +=message.sender+": "+ message.text + "<br>";});
 	}
     }
     xmlhttp.open("GET", "talk?id=" + current_conversation + "&content=messages", true);
@@ -16,8 +18,12 @@ function getParticipants(){
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function(){
 	if(xmlhttp.readyState == 4){
-	    document.getElementById("participants").innerHTML =
-		xmlhttp.responseText;
+		var json= JSON.parse(xmlhttp.responseText);
+		json.users.forEach(function(user){
+	    document.getElementById("participants").innerHTML+=
+		user+"</br>";
+
+		});
 	}
     }
     xmlhttp.open("GET", "talk?id=" + current_conversation + "&content=users", true);
@@ -35,6 +41,7 @@ function sendMessage(){
     }
     xmlhttp.open("POST", "talk", true);
     xmlhttp.send(JSON.stringify({id: current_conversation, message: message}));
+	getHistory();
 }
 
 
